@@ -1,0 +1,38 @@
+# --- Maven ---
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/resources/**/target/
+*.class
+
+# --- IntelliJ IDEA / Cursor / VS Code ---
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+.DS_Store
+
+# --- Docker Mounted Volumes (关键！绝对不能上传) ---
+# 忽略 docker 目录下所有以 -data 结尾的文件夹
+docker/*-data/
+docker/logs/
+
+# --- Logs ---
+logs/
+*.log
+
+# --- OS System Files ---
+Thumbs.db
+ehthumbs.db
+
+# --- Spring Boot ---
+.mvn/
+mvnw
+mvnw.cmd
+
+# --- Temporary Files ---
+*.swp
+*~

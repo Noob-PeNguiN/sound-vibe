@@ -1,0 +1,58 @@
+# SoundVibe Catalog Service 配置文件
+server:
+  port: 8083
+
+spring:
+  application:
+    name: vibe-catalog
+  
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/sound_vibe_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+  
+  # RabbitMQ 消息队列（用于作品同步到搜索服务）
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+  # Nacos 服务注册与发现
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: public
+        group: DEFAULT_GROUP
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  configuration:
+    # 开启驼峰命名转换 (camelCase <-> snake_case)
+    map-underscore-to-camel-case: true
+    # 日志输出 (开发时可以看到 SQL)
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      # 主键类型: 自增
+      id-type: auto
+      # 逻辑删除字段名
+      logic-delete-field: deleted
+      # 逻辑已删除值
+      logic-delete-value: 1
+      # 逻辑未删除值
+      logic-not-delete-value: 0
+
+# vibe-analysis Python 服务地址（AI 音乐生成 & 音频分析）
+analysis:
+  service:
+    url: http://localhost:8090
+
+# 日志配置
+logging:
+  level:
+    com.soundvibe.catalog: debug
+    com.baomidou.mybatisplus: debug

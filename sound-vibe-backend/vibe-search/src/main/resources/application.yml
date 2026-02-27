@@ -1,0 +1,48 @@
+# ============================================================
+# SoundVibe Search Service 配置
+# 基于 Elasticsearch + RabbitMQ 的作品元数据搜索服务
+# 端口: 8084
+# ============================================================
+
+server:
+  port: 8084
+
+spring:
+  application:
+    name: vibe-search
+
+  # -------------------- Elasticsearch 配置 --------------------
+  elasticsearch:
+    uris: http://localhost:9200
+
+  # -------------------- RabbitMQ 配置 --------------------
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+  # -------------------- Nacos 服务注册与发现 --------------------
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: public
+        group: DEFAULT_GROUP
+
+  # -------------------- 排除不需要的自动配置 --------------------
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+
+# -------------------- vibe-analysis Python 服务地址 --------------------
+analysis:
+  service:
+    url: http://localhost:8090
+
+# 日志配置
+logging:
+  level:
+    com.soundvibe.search: debug
+    org.springframework.data.elasticsearch: debug

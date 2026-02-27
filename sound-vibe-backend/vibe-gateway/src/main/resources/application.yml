@@ -1,0 +1,66 @@
+# ============================================================
+# SoundVibe API Gateway 配置
+# 基于 Spring Cloud Gateway (WebFlux + Netty)
+# 统一入口端口: 8080
+# ============================================================
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: vibe-gateway
+
+  # -------------------- Nacos 服务注册与发现 --------------------
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: public
+        group: DEFAULT_GROUP
+        # Nacos 不可用时仍允许启动 (Fail Fast = false)
+        fail-fast: false
+
+    # -------------------- Gateway 路由配置 --------------------
+    gateway:
+      routes:
+        # ===== 认证服务 (vibe-auth, 端口 8081) =====
+        - id: vibe-auth-route
+          uri: lb://vibe-auth
+          predicates:
+            - Path=/auth/**
+
+        # ===== 资产服务 (vibe-asset, 端口 8082) =====
+        - id: vibe-asset-route
+          uri: lb://vibe-asset
+          predicates:
+            - Path=/assets/**
+
+        # ===== 目录服务 (vibe-catalog, 端口 8083) =====
+        - id: vibe-catalog-route
+          uri: lb://vibe-catalog
+          predicates:
+            - Path=/catalog/**
+
+        # ===== 搜索服务 (vibe-search, 端口 8084) =====
+        - id: vibe-search-route
+          uri: lb://vibe-search
+          predicates:
+            - Path=/search/**
+
+        # ===== 订单服务 (vibe-order, 端口 8085) =====
+        - id: vibe-order-route
+          uri: lb://vibe-order
+          predicates:
+            - Path=/order/**
+
+# -------------------- JWT 配置 --------------------
+jwt:
+  # 密钥 (必须与 vibe-auth 的 JwtUtil 中 SECRET 保持一致)
+  secret: soundvibe-secret-2026
+
+# -------------------- 日志配置 --------------------
+logging:
+  level:
+    com.soundvibe.gateway: debug
+    org.springframework.cloud.gateway: debug

@@ -1,0 +1,140 @@
+version: '3.8'
+name: sound-vibe-docker
+
+services:
+  # 1. Nacos (注册中心 & 配置中心)
+  # ✅ 使用 -slim 版本，包含原生 ARM64 支持
+  nacos:
+    image: nacos/nacos-server:v2.3.2-slim
+    container_name: vibe-nacos
+    environment:
+      - MODE=standalone
+      - AUTH_ENABLED=false
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849" # v2.x gRPC 端口
+    networks:
+      - vibe-net
+
+  # 2. Database (回归 MySQL 8.0)
+  # ✅ MySQL 8.0 官方已支持 ARM64，无需 platform 标志
+  mysql:
+    image: mysql:8.0
+    container_name: vibe-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sound_vibe_db
+    ports:
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    networks:
+      - vibe-net
+
+  # 3. Redis (缓存)
+  redis:
+    image: redis:7.0
+    container_name: vibe-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - ./redis-data:/data
+    networks:
+      - vibe-net
+
+  # 4. RabbitMQ (消息队列)
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: vibe-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - vibe-net
+
+  # 5. MinIO (对象存储)
+  minio:
+    image: minio/minio
+    container_name: vibe-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - ./minio-data:/data
+    networks:
+      - vibe-net
+
+  # 6. Elasticsearch (搜索引擎)
+  elasticsearch:
+    image: elasticsearch:8.11.1
+    container_name: vibe-es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # 限制内存
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./es-data:/usr/share/elasticsearch/data
+    networks:
+      - vibe-net
+
+  # 7. Kibana (可视化)
+  kibana:
+    image: kibana:8.11.1
+    container_name: vibe-kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://vibe-es:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - vibe-net
+
+  # 8. Audio Analysis Service (Python)
+  vibe-analysis:
+    build:
+      context: ../../sound-vibe-analysis
+      dockerfile: Dockerfile
+    container_name: vibe-analysis
+    environment:
+      - DB_HOST=vibe-mysql
+      - DB_PORT=3306
+      - DB_NAME=sound_vibe_db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - RABBITMQ_HOST=vibe-rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+      - MINIO_ENDPOINT=vibe-minio:9000
+      - MINIO_EXTERNAL_ENDPOINT=localhost:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET=soundvibe-assets
+      - MINIO_SECURE=false
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8090
+    ports:
+      - "8090:8090"
+    depends_on:
+      - mysql
+      - rabbitmq
+      - minio
+    networks:
+      - vibe-net
+
+networks:
+  vibe-net:
+    driver: bridge

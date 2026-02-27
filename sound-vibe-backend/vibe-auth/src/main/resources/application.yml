@@ -1,0 +1,63 @@
+# SoundVibe Auth Service 配置文件
+server:
+  port: 8081
+
+spring:
+  application:
+    name: vibe-auth
+  
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/sound_vibe_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+  
+  # 文件上传大小限制（预留，避免转发或误请求时报错）
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+  # Nacos 服务注册与发现
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: public
+        group: DEFAULT_GROUP
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  configuration:
+    # 开启驼峰命名转换 (camelCase <-> snake_case)
+    map-underscore-to-camel-case: true
+    # 日志输出 (开发时可以看到 SQL)
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      # 主键类型: 自增
+      id-type: auto
+      # 逻辑删除字段名
+      logic-delete-field: deleted
+      # 逻辑已删除值
+      logic-delete-value: 1
+      # 逻辑未删除值
+      logic-not-delete-value: 0
+
+# JWT 配置 (自定义配置)
+jwt:
+  # 密钥 (生产环境请使用更复杂的密钥)
+  secret: soundvibe-jwt-secret-key-2026-very-secure
+  # 过期时间 (单位: 秒, 7天)
+  expire: 604800
+  # Token 前缀
+  header: Authorization
+  # Token 类型
+  token-prefix: Bearer
+
+# 日志配置
+logging:
+  level:
+    com.soundvibe.auth: debug
+    com.baomidou.mybatisplus: debug

@@ -1,0 +1,34 @@
+# ============================================
+# SoundVibe Audio Intelligence Service
+# Python 3.10+
+# ============================================
+
+# Web Framework (健康检查 & 监控端点)
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+
+# 音频分析
+librosa==0.10.2.post1
+numpy==1.26.4
+soundfile==0.12.1
+
+# 消息队列 (RabbitMQ)
+pika==1.3.2
+
+# 对象存储 (MinIO)
+minio==7.2.12
+
+# 数据库 (MySQL)
+sqlalchemy==2.0.36
+pymysql==1.1.1
+
+# AI 模型 (CLAP Audio-Text Embeddings)
+torch>=2.1.0
+torchaudio>=2.1.0
+transformers>=4.36.0
+
+# 音频文件写入
+scipy>=1.11.0
+
+# 配置管理
+python-dotenv==1.0.1
