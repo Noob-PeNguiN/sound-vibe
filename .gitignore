@@ -25,6 +25,8 @@ Desktop.ini
 .project
 .settings/
 .vscode/
+.cursor/
+.cursorrules
 *.suo
 *.ntvs
 *.njsproj
